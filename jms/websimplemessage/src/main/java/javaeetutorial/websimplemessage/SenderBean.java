@@ -50,7 +50,7 @@ public class SenderBean {
 
         try {
             String username = "root";  // Replace with actual MQ user
-            String password = "5kRxG*E9wJc!:EG4KbqFEBdM";  // Replace with actual MQ password
+            String password = "";  // Replace with actual MQ password
 
             connection = connectionFactory.createConnection(username, password); // Pass credentials
             // connection = connectionFactory.createConnection();
