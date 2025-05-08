@@ -1,33 +1,39 @@
 package javaeetutorial.websimplemessage;
 
-import javax.annotation.Resource;
-import javax.enterprise.context.RequestScoped;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSContext;
-import javax.jms.JMSException;
-import javax.jms.JMSRuntimeException;
-import javax.jms.Queue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.enterprise.context.RequestScoped;
+import javax.jms.*;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
-@Named
+@Named("senderBean")
 @RequestScoped
 public class SenderBean {
 
     static final Logger logger = Logger.getLogger("SenderBean");
 
-    @Resource(lookup = "jms/MyWMQConnectionFactory")
     private ConnectionFactory connectionFactory;
-
-    @Resource(lookup = "jms/MyWMQQueue")
     private Queue queue;
-
     private String messageText;
 
-    public SenderBean() {
+    @PostConstruct
+    public void init() {
+        try {
+            Context ctx = new InitialContext();
+            //connectionFactory = (ConnectionFactory) ctx.lookup("jms/ConnectionFactory");
+            //queue = (Queue) ctx.lookup("jms/Queue");
+
+            connectionFactory = (ConnectionFactory) ctx.lookup("java:comp/env/jms/ConnectionFactory");
+            queue = (Queue) ctx.lookup("java:comp/env/jms/MWQueue");
+        } catch (NamingException e) {
+            logger.log(Level.SEVERE, "JNDI lookup failed", e);
+        }
     }
 
     public String getMessageText() {
@@ -39,17 +45,33 @@ public class SenderBean {
     }
 
     public void sendMessage() {
-        try (JMSContext context = connectionFactory.createContext()) {
+        Connection connection = null;
+        Session session = null;
+
+        try {
+            String username = "root";  // Replace with actual MQ user
+            String password = "5kRxG*E9wJc!:EG4KbqFEBdM";  // Replace with actual MQ password
+
+            connection = connectionFactory.createConnection(username, password); // Pass credentials
+            // connection = connectionFactory.createConnection();
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            MessageProducer producer = session.createProducer(queue);
+            connection.start();
             String text = "Message from producer: " + messageText;
-            context.createProducer().send(queue, text);
+            TextMessage message = session.createTextMessage(text);
+            producer.send(message);
 
             FacesMessage facesMessage =
                 new FacesMessage("Sent message: " + text);
             FacesContext.getCurrentInstance().addMessage(null, facesMessage);
 
-        } catch (JMSRuntimeException e) {
-            logger.log(Level.SEVERE, "SenderBean.sendMessage: Exception: {0}", e.toString());
+        } catch (JMSException e) {
+            logger.log(Level.SEVERE, "SenderBean.sendMessage: Exception", e);
+        } finally {
+            try {
+                if (session != null) session.close();
+                if (connection != null) connection.close();
+            } catch (JMSException ignored) {}
         }
     }
 }
-
