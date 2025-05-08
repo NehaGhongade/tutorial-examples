@@ -39,11 +39,9 @@ public class ReceiverBean {
         Session session = null;
 
         try {
-            String username = "root";  // Replace with actual MQ user
-            String password = "passwd";  // Replace with actual MQ password
-
-            connection = connectionFactory.createConnection(username, password); // Pass credentials
-            //connection = connectionFactory.createConnection();
+           
+           
+            connection = connectionFactory.createConnection();
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             MessageConsumer consumer = session.createConsumer(queue);
             connection.start();
