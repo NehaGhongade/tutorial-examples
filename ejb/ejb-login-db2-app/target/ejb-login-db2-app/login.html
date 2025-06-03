@@ -1,11 +1,45 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script>
+    (function(s, t, a, n) {
+      s[t] || (s[t] = a, n = s[a] = function() {
+        n.q.push(arguments)
+      }, n.q = [], n.v = 2, n.l = 1 * new Date())
+    })(window, "InstanaEumObject", "ineum");
+
+    ineum('reportingUrl', 'https://eum-magenta-saas.instana.rocks');
+    ineum('key', 'BcbUASokT2GnUJZvGMqiWA');
+    ineum('trackSessions');
+    ineum('autoPageDetection', true);
+    ineum('enableW3CHeaders', true);
+    ineum('user', 'WASInstana1');
+
+
+    // Wait until DOM is fully loaded before attaching event listener
+    document.addEventListener('DOMContentLoaded', function() {
+      var form = document.getElementById('loginForm');
+      if (form) {
+        form.addEventListener('submit', function() {
+          var usernameInput = document.getElementById('username');
+          if (usernameInput) {
+            console.log("Username entered:", usernameInput.value);
+            var username = usernameInput.value;
+            console.log("Username entered:", username);
+            ineum('user', 'WASInstana');
+          }
+        });
+      }
+    });
+  </script>
+
+    <script defer crossorigin="anonymous" src="https://eum-magenta-saas.instana.rocks/1.7.5/eum.min.js"></script>
+
     <title>Login</title>
 </head>
 <body>
-<form action="login" method="post">
-    <label>Username: <input name="username" /></label><br/>
+<form id="loginForm" action="login" method="post">
+    <label>Username: <input name="username" id="username" /></label><br/>
     <label>Password: <input name="password" type="password" /></label><br/>
     <button type="submit">Login</button>
 </form>
