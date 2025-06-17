@@ -21,10 +21,19 @@ public class LoginServlet extends HttpServlet {
     String username = request.getParameter("username");
     String password = request.getParameter("password");
 
-    if (loginService.authenticate(username, password)) {
-      response.getWriter().println("Login successful");
+   /* if (loginService.authenticate(username, password)) {
+      response.getWriter().println("Login Successful For" + username );
     } else {
-      response.getWriter().println("Login failed");
-    }
+      response.getWriter().println("Login Failed For " + username );
+    }*/
+    boolean success = loginService.authenticate(username, password);
+
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
+
+    String jsonResponse = "{\"status\":\"" + (success ? "success" : "failure") + "\","
+        + "\"username\":\"" + username + "\"}";
+
+    response.getWriter().write(jsonResponse);
   }
 }
